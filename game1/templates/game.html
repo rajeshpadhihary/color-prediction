@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Game</title>
+    <script>
+        function updateTimer(endTime) {
+            const endTimeDate = new Date(endTime);
+            const interval = setInterval(() => {
+                const now = new Date();
+                const timeRemaining = endTimeDate - now;
+                
+                if (timeRemaining <= 0) {
+                    clearInterval(interval);
+                    document.getElementById("timer").innerHTML = "Round Ended";
+                    window.location.href = "{% url 'game1:result' %}";
+                } else {
+                    const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+                    document.getElementById("timer").innerHTML = minutes + "m " + seconds + "s ";
+                }
+            }, 1000);
+        }
+
+        window.onload = function() {
+            const endTime = "{{ game_round.end_time|date:'c' }}";
+            updateTimer(endTime);
+        };
+    </script>
+</head>
+<body>
+    <h1>Game Round {{ game_round.round_number }}</h1>
+    <p>Round ends at: {{ game_round.end_time }}</p>
+    <p>Time Remaining: <span id="timer"></span></p>
+    <p>Correct color will be revealed after the round ends.</p>
+
+    {% if not existing_prediction %}
+        <form method="post">
+            {% csrf_token %}
+            <label for="color">Choose a color:</label>
+            <select name="color" id="color">
+                <option value="red">Red</option>
+                <option value="green">Green</option>
+                <option value="blue">Blue</option>
+                <option value="yellow">Yellow</option>
+            </select>
+            <button type="submit">Submit</button>
+        </form>
+    {% else %}
+        <p>You've already made your prediction for this round.</p>
+    {% endif %}
+
+    <h2>Prediction History</h2>
+    <ul>
+        {% for prediction in last_10_predictions %}
+            <li>Round {{ prediction.game_round.round_number }}: Predicted {{ prediction.predicted_color }} - 
+            {% if now >= prediction.game_round.end_time %}
+                {% if prediction.is_correct %}
+                    Correct
+                {% else %}
+                    Incorrect
+                {% endif %}
+            {% else %}
+                Pending
+            {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'logout' %}">logout</a>
+</body>
+</html>

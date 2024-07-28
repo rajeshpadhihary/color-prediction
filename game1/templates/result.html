@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Game Result</title>
+</head>
+<body>
+    <h1>Game Round {{ last_game_round.round_number }} Result</h1>
+    <p>The correct color was: {{ last_game_round.correct_color }}</p>
+    {% if prediction %}
+        <p>Your prediction: {{ prediction.predicted_color }}</p>
+        {% if prediction.is_correct %}
+            <p>Congratulations! Your prediction was correct.</p>
+        {% else %}
+            <p>Sorry, your prediction was incorrect.</p>
+        {% endif %}
+    {% else %}
+        <p>You did not make a prediction for this round.</p>
+    {% endif %}
+    <a href="{% url 'game1:game1' %}">Back to Game</a>
+</body>
+</html>
